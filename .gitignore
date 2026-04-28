@@ -1,0 +1,44 @@
+# DevLab .gitignore
+# ================
+# Never commit sensitive files to this repository
+
+# SSH keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Gitea app.ini contains secrets
+configs/gitea-app.ini
+
+# Environment files
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Azure credentials
+*.publishsettings
+.azure/
