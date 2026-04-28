@@ -1,0 +1,13 @@
+[Unit]
+Description=DevLab Unit Converter — Flask Web Application
+After=network.target
+
+[Service]
+User=devadmin
+WorkingDirectory=/var/www/devlab-app
+ExecStart=/usr/bin/python3 /var/www/devlab-app/app.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
