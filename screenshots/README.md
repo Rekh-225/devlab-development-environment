@@ -1,10 +1,4 @@
-# Screenshots
 
-This folder contains evidence screenshots taken during the project demonstration.
-
-## Required Screenshots
-
-Upload the following screenshots to this folder:
 
 | Filename | Content |
 |----------|---------|
@@ -26,15 +20,3 @@ Upload the following screenshots to this folder:
 | `git-pull-linux.png` | Terminal on Ubuntu VM showing successful git pull output |
 | `vmware-vms.png` | VMware Workstation showing both client VMs in the library |
 | `ssh-connection.png` | SSH connection to Azure server from local laptop |
-
-## How to take screenshots
-
-**From VMware VM console:**
-Press `Ctrl+Alt` to release mouse from VM, then use your normal screenshot tool.
-
-**From browser:**
-Press `F12` → in console type `window.print()` for a full-page capture,
-or use browser's built-in screenshot (F12 → three dots → Screenshot).
-
-**From SSH terminal:**
-Simply take a screenshot of your PowerShell/Terminal window.
