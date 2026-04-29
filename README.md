@@ -168,9 +168,6 @@ devlab-development-environment/
 
 ## 🚀 Key Technical Decisions
 
-**Why Azure over local hosting?**  
-Azure provides a globally accessible static IP, meaning all three team members can access the server from any location — university, home, or library — without VPN or port forwarding. The Azure for Students programme provided USD 100 free credit.
-
 **Why Gitea over GitLab?**  
 GitLab CE requires a minimum of 4 GB RAM just for itself, consuming the entire VM budget. Gitea provides all required features (Git hosting, issue tracker, role-based access, admin-only registration) using under 100 MB RAM.
 
@@ -181,15 +178,6 @@ The task required a simple, auditable, scheduled backup. rsync is a battle-teste
 The server uses a raw IP address rather than a registered domain name. Let's Encrypt requires domain validation and cannot issue certificates for bare IP addresses. A self-signed certificate provides the same encryption quality for this use case.
 
 ---
-
-## 👥 Team
-
-| Name | Student ID | Role |
-|------|-----------|------|
-| Rehan Khaliq | EPA5RI | Infrastructure, Azure, Gitea, Nginx, Flask, DevOps |
-| Shah Nawaz | GEWXHI | Web Development, Documentation |
-| Danial Umer | FTBE2V | Backup Automation, Linux Client, Testing |
-
 ---
 
 ## 🎓 Academic Context
@@ -197,18 +185,7 @@ The server uses a raw IP address rather than a registered domain name. Let's Enc
 - **Institution:** Obuda University — John von Neumann Faculty of Informatics
 - **Course:** Operating Systems
 - **Semester:** Spring 2025–2026
-- **Task:** Task 3 — Development Environment and Web Service
-- **Final Score:** Full core marks + 4.8 bonus points
-
-### Bonus Points Achieved
-| Bonus | Points |
-|-------|--------|
-| HTTPS website with TLS | +0.6 |
-| Web application with server-side computation | +2.0 |
-| Monitoring dashboard (Netdata) | +1.2 |
-| Cross-platform Linux client VM | +1.0 |
-| **Total** | **+4.8** |
-
+- **Task:** Development Environment and Web Service
 ---
 
 ## 📄 License
