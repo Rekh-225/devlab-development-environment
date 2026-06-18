@@ -19,4 +19,4 @@
 | `git-push-windows.png` | PowerShell on Windows 11 VM showing successful git push output |
 | `git-pull-linux.png` | Terminal on Ubuntu VM showing successful git pull output |
 | `vmware-vms.png` | VMware Workstation showing both client VMs in the library |
-| `ssh-connection.png` | SSH connection to Azure server from local laptop |
+| `ssh-connection.png` | SSH connection to Azure server from local laptop (IP address redacted) |
