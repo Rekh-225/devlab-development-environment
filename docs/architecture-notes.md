@@ -92,7 +92,7 @@ permission system. The mapping used is:
 Both client VMs use VMware NAT networking. NAT provides:
 - Automatic internet access through the host machine's connection
 - No manual IP configuration required
-- Direct access to the Azure server's public IP (20.215.214.197)
+- Direct access to the Azure server's public IP ()
 - Works on any WiFi network the host laptop connects to
 
 The VMs do not need to be on the same network as each other —
