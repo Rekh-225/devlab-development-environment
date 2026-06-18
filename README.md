@@ -1,4 +1,8 @@
-<h1 align="center">DevLab — Self-Hosted Development Environment & Web Service</h1>
+<h1 align="center">DevLab - Self-Hosted Development Environment</h1>
+
+<p align="center">
+  A personal cloud infrastructure project that recreates a small-team development platform using Linux, Gitea, Nginx, Flask, Netdata, DNS, TLS, firewalling, and automated backups.
+</p>
 
 <div align="center">
   <img src="https://img.shields.io/badge/Ubuntu-24.04_LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" alt="Ubuntu" />
@@ -8,179 +12,155 @@
   <img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask" />
 </div>
 
-<br />
-
-> **University Semester Project** · Operating Systems · Spring 2025–2026  
-> **Obuda University** — John von Neumann Faculty of Informatics  
-> BSc in Computer Science Engineering
-
 ---
 
-## 📋 Table of Contents
+## Overview
 
-- [Project Overview](#-project-overview)
-- [Architecture](#-architecture)
-- [Technology Stack](#-technology-stack)
-- [Features Implemented](#-features-implemented)
-- [Repository Structure](#-repository-structure)
-- [Key Technical Decisions](#-key-technical-decisions)
-- [Academic Context](#-academic-context)
-- [License](#-license)
+DevLab is a self-hosted development environment built on an Ubuntu Server VM in Microsoft Azure. The project demonstrates how a small software team could run its own private source-code hosting, issue tracking, website, monitoring dashboard, internal DNS, and backup workflow without depending on managed platforms such as GitHub or GitLab.com.
 
----
+The environment is intentionally built from standard Linux services rather than a single bundled platform. This made the project useful for practicing server administration, service hardening, reverse proxy configuration, systemd services, firewall rules, DNS records, and backup automation.
 
-## 🚀 Project Overview
+The VM is not intended to run continuously. It is usually powered on only for demos, testing, or maintenance.
 
-**DevLab** is a complete, production-style on-premise development environment tailored for a small software development team. The primary goal is to provide developers with full ownership and control over their source code, issue tracking, and corporate website—eliminating reliance on external cloud-based hosting platforms like GitHub or GitLab.com.
+## What This Project Shows
 
-The entire stack is self-hosted on a **Microsoft Azure virtual machine** running **Ubuntu Server 24.04 LTS**, featuring all services configured, secured, and automated from scratch.
+- Provisioned and administered an Ubuntu Server 24.04 LTS VM on Microsoft Azure.
+- Deployed Gitea for self-hosted Git repositories, organizations, users, roles, branches, and issues.
+- Configured Nginx as a static website host and reverse proxy.
+- Built a small Flask unit-converter app and exposed it through Nginx.
+- Configured HTTPS with a self-signed OpenSSL certificate.
+- Set up Netdata for live CPU, RAM, disk, and network monitoring.
+- Added internal DNS records with dnsmasq.
+- Hardened access with Azure NSG, UFW, and SSH key authentication.
+- Automated nightly backups using rsync and cron.
+- Validated Git workflows from Windows and Ubuntu client VMs in VMware Workstation.
 
----
-
-## 🏗️ Architecture
-
-Below is the high-level architecture diagram demonstrating the interaction between developer workstations and the DevLab cloud infrastructure.
+## Architecture
 
 ```mermaid
 flowchart TD
-    %% Define styles
-    classDef vm fill:#2B2B2B,stroke:#555,stroke-width:2px,color:#FFF,rx:5px,ry:5px;
-    classDef azure fill:#0072C6,stroke:#005A9E,stroke-width:2px,color:#FFF,rx:5px,ry:5px;
-    classDef service fill:#EAEAEA,stroke:#999,stroke-width:1px,color:#000,rx:5px,ry:5px;
-    classDef workstation fill:#3C3C3C,stroke:#666,stroke-width:2px,color:#FFF,rx:5px,ry:5px;
-    classDef firewall fill:#D13438,stroke:#A4262C,stroke-width:2px,color:#FFF,rx:5px,ry:5px;
-
-    subgraph Workstations ["Developer Workstations (VMware)"]
-        direction LR
-        W1["💻 winclient01<br>Windows 11 Edu<br>VS Code · Git CLI"]:::workstation
-        W2["🐧 linuxclient02<br>Ubuntu Desktop 24.04<br>VS Code · Git CLI"]:::workstation
+    subgraph Clients["Developer Client VMs - VMware Workstation"]
+        W1["winclient01<br/>Windows 11<br/>Git CLI + VS Code"]
+        W2["linuxclient02<br/>Ubuntu Desktop 24.04<br/>Git CLI + VS Code"]
     end
 
-    subgraph Azure ["Microsoft Azure — Poland Central Region"]
-        direction TB
-        NSG["🛡️ Azure NSG (Firewall)<br>Default Deny Inbound<br>Whitelist: 22, 80, 443, 3000, 19999"]:::firewall
-        
-        subgraph Ubuntu ["Ubuntu Server 24.04 LTS (20.215.214.197)"]
-            direction TB
-            S1["🦊 Gitea<br>:3000"]:::service
-            S2["🌐 Nginx<br>:80 / :443"]:::service
-            S3["🔧 dnsmasq<br>:53"]:::service
-            S4["📊 Netdata<br>:19999"]:::service
-            S5["🐍 Flask App<br>:5000"]:::service
-            S6["🧱 UFW Firewall"]:::service
-            S7["🔄 rsync + cron<br>Nightly Backup"]:::service
+    subgraph Azure["Microsoft Azure"]
+        NSG["Azure Network Security Group<br/>Allowed: SSH, HTTP, HTTPS, Gitea, Netdata"]
+
+        subgraph Server["Ubuntu Server 24.04 LTS"]
+            UFW["UFW Firewall"]
+            NGINX["Nginx<br/>Website + Reverse Proxy"]
+            GITEA["Gitea<br/>Self-hosted Git + Issues"]
+            FLASK["Flask App<br/>Unit Converter"]
+            DNS["dnsmasq<br/>Internal DNS"]
+            NETDATA["Netdata<br/>Monitoring"]
+            BACKUP["rsync + cron<br/>Nightly Backups"]
         end
-        NSG --> Ubuntu
     end
 
-    W1 -- "git push / pull (HTTPS)" --> NSG
-    W2 -- "git pull (HTTPS)" --> NSG
+    W1 -->|"git push / pull"| NSG
+    W2 -->|"git pull"| NSG
+    NSG --> UFW
+    UFW --> NGINX
+    NGINX --> GITEA
+    NGINX --> FLASK
+    UFW --> NETDATA
+    UFW --> DNS
+    BACKUP --> GITEA
+    BACKUP --> NGINX
 ```
 
----
-
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Cloud** | Microsoft Azure (Poland Central) | VM hosting, static public IP |
-| **Server OS** | Ubuntu Server 24.04 LTS | All services host OS |
-| **Version Control** | Gitea 1.22.3 | Self-hosted Git + issue tracker |
-| **Web Server** | Nginx 1.24+ | Corporate website + reverse proxy |
-| **DNS** | dnsmasq 2.89+ | Internal hostname resolution |
-| **Monitoring** | Netdata (latest) | Real-time CPU/RAM/Disk/Network |
-| **Backup** | rsync + cron | Nightly automated backup at 23:00 |
-| **Web App** | Python Flask 3.x | Server-side unit converter |
-| **TLS** | OpenSSL (self-signed) | HTTPS encryption |
-| **Firewall** | Azure NSG + UFW | Dual-layer default-deny |
-| **Client 1** | Windows 11 Education (VMware) | Developer workstation |
-| **Client 2** | Ubuntu Desktop 24.04 (VMware) | Cross-platform client |
-| **IDE** | Visual Studio Code | Development environment |
-| **VCS Client** | Git CLI | Push/pull operations |
+| --- | --- | --- |
+| Cloud | Microsoft Azure | VM hosting and public access |
+| Server OS | Ubuntu Server 24.04 LTS | Host operating system |
+| Version Control | Gitea 1.22.3 | Self-hosted Git and issue tracking |
+| Web Server | Nginx | Static website and reverse proxy |
+| Web App | Python Flask | Server-side unit converter |
+| Monitoring | Netdata | Live system metrics |
+| DNS | dnsmasq | Internal hostname resolution |
+| Backup | rsync + cron | Scheduled backups |
+| TLS | OpenSSL | Self-signed HTTPS certificate |
+| Security | Azure NSG + UFW + SSH keys | Layered access control |
+| Client VMs | Windows 11 and Ubuntu Desktop | Cross-platform Git workflow testing |
 
----
+## Screenshots
 
-## ✅ Features Implemented
+| Area | Evidence |
+| --- | --- |
+| Gitea dashboard | <img src="screenshots/gitea-dashboard.png" alt="Gitea dashboard" width="420" /> |
+| Organizations and teams | <img src="screenshots/gitea-organisations.png" alt="Gitea organizations" width="420" /> |
+| Branch workflow | <img src="screenshots/gitea-branches.png" alt="Gitea branches" width="420" /> |
+| Issues | <img src="screenshots/gitea-issues.png" alt="Gitea issues" width="420" /> |
+| Website homepage | <img src="screenshots/website-homepage.png" alt="Website homepage" width="420" /> |
+| Flask converter | <img src="screenshots/converter-result.png" alt="Converter result" width="420" /> |
+| Netdata monitoring | <img src="screenshots/netdata-dashboard.png" alt="Netdata dashboard" width="420" /> |
+| Backup log | <img src="screenshots/backup-log.png" alt="Backup log" width="420" /> |
+| Windows Git push | <img src="screenshots/git-push-windows.png" alt="Windows Git push" width="420" /> |
+| Linux Git pull | <img src="screenshots/git-pull-linux.png" alt="Linux Git pull" width="420" /> |
+| VMware clients | <img src="screenshots/vmware-vms.png" alt="VMware VMs" width="420" /> |
 
-### 🦊 Version Control (Gitea)
-- **Self-Hosted:** Git repository server with an integrated issue tracker.
-- **Access Control:** Admin-only account creation (public self-registration disabled).
-- **Organization:** 2 organizations (`devlab-alpha`, `devlab-beta`) and 2 repositories (`project-alpha`, `project-beta`).
-- **Users:** 7 user accounts with role-based access (Owner / Writer / Reader).
-- **Workflow:** Branch management (main + development + testing) and issue tracking (8 active issues).
+More screenshots are available in the [`screenshots/`](screenshots/) folder.
 
-### 🌐 Web Server (Nginx)
-- **Corporate Website:** Hosted 4 pages (Home, Services, Contact, About Us).
-- **Security:** HTTPS enabled with automatic HTTP → HTTPS redirection using a self-signed TLS certificate (RSA 2048-bit, OpenSSL).
-- **Routing:** Acts as a reverse proxy for Gitea and the internal Flask application.
-
-### 🐍 Web Application (Python Flask)
-- **Service:** Server-side unit converter application.
-- **Functionality:** 8 conversion types (e.g., km/miles, Celsius/Fahrenheit).
-- **Integration:** Accessible via `/converter` on the main website, running as a systemd service proxied by Nginx.
-
-### 🔧 Network & Monitoring
-- **DNS (dnsmasq):** Internal resolution for `devlab.local` hostnames (`git`, `www`, `monitor`) with Google DNS fallback.
-- **Monitoring (Netdata):** Real-time hardware dashboard (CPU, RAM, Disk I/O, Network) accessible at port 19999.
-- **Backup (rsync + cron):** Automated nightly backups at 23:00 for Gitea repositories and website files.
-
-### 🛡️ Security & Clients
-- **Hardening:** Public key authentication only for SSH, dual firewall setup (Azure NSG + UFW) with default-deny inbound.
-- **Client Validation:** Tested push/pull operations from both Windows 11 and Ubuntu Desktop 24.04 VMs using VS Code and Git CLI.
-
----
-
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 devlab-development-environment/
-├── README.md                          ← You are here
-├── docs/
-│   ├── DevLab_Documentation.pdf       ← Full project documentation (40+ pages)
-│   └── architecture-diagram.md        ← Detailed architecture notes
-├── configs/
-│   ├── nginx-devlab.conf              ← Nginx virtual host config
-│   ├── dnsmasq.conf                   ← dnsmasq DNS config
-│   └── gitea-app.ini                  ← Gitea configuration (sanitised)
-├── scripts/
-│   ├── devlab-backup.sh               ← Nightly backup script
-│   ├── setup-server.sh                ← Server baseline setup script
-│   └── gitea-service.service          ← Gitea systemd service file
+├── README.md
 ├── app/
-│   └── app.py                         ← Python Flask unit converter
-└── screenshots/
-    ├── gitea-dashboard.png
-    ├── website-https.png
-    ├── netdata-dashboard.png
-    ├── git-push-windows.png
-    └── git-pull-linux.png
+│   └── app.py
+├── configs/
+│   ├── dnsmasq.conf
+│   └── nginx-devlab.conf
+├── docs/
+│   ├── architecture-notes.md
+│   └── DevLab_Final_Documentation (1).docx
+├── screenshots/
+│   ├── README.md
+│   └── *.png
+└── scripts/
+    ├── devlab-app.service
+    ├── devlab-backup.sh
+    ├── gitea.service
+    └── setup-server.sh
 ```
 
----
+## Key Implementation Details
 
-## 🧠 Key Technical Decisions
+### Gitea
 
-- **Why Gitea over GitLab?**  
-  GitLab CE requires a minimum of 4 GB RAM just for itself, consuming the entire VM budget. Gitea provides all required features (Git hosting, issue tracker, role-based access, admin-only registration) using under 100 MB RAM.
-  
-- **Why rsync + cron over dedicated backup software?**  
-  The task required a simple, auditable, scheduled backup. `rsync` is a battle-tested Unix tool that has been in production use since 1996. The backup script is ~20 lines—easy to verify, audit, and troubleshoot.
-  
-- **Why self-signed TLS over Let's Encrypt?**  
-  The server uses a raw IP address rather than a registered domain name. Let's Encrypt requires domain validation and cannot issue certificates for bare IP addresses. A self-signed certificate provides the necessary encryption for an internal development environment.
+Gitea was selected because it provides Git hosting, issue tracking, organizations, branch workflows, and role-based access while staying lightweight enough for a small VM. The environment includes two organizations and two repositories to simulate separate project teams.
 
----
+### Nginx and Flask
 
-## 🎓 Academic Context
+Nginx serves the static website and proxies requests to the Flask unit-converter app. This separates the public web entry point from the internal application service and keeps routing centralized.
 
-This project serves as a comprehensive assignment for the **Operating Systems** course during the **Spring 2025–2026** semester at **Obuda University (John von Neumann Faculty of Informatics)**. It highlights practical skills in cloud deployment, server configuration, networking, and CI/CD pipelines.
+### Security
 
----
+The server uses layered network controls:
 
-## 📄 License
+- Azure NSG controls cloud-level inbound access.
+- UFW controls host-level inbound access.
+- SSH uses key-based authentication.
+- Gitea public self-registration is disabled.
+- Sensitive files such as SSH keys, certificates, `.env` files, logs, and Gitea `app.ini` are excluded by `.gitignore`.
 
-This project was created for educational purposes. All software components used are open-source. Configuration files and scripts in this repository are free to use and adapt.
+### Backups
 
-<p align="center">
-  <i>Built with ❤️ by an Obuda University Student</i>
-</p>
+Backups are handled with a small shell script using `rsync`. A root cron job runs it every night at 23:00 and writes success/failure entries to a log file.
+
+## Project Origin
+
+This project began as a hands-on operating systems lab build and is now maintained as a personal infrastructure and DevOps portfolio project.
+
+## Notes
+
+- The public server may be offline because the VM is only powered on when needed.
+- The HTTPS setup uses a self-signed certificate because the deployment uses an IP-based demo environment rather than a registered domain.
+- Screenshots are included as evidence of the configured services and tested workflows.
+
+## License
+
+This repository is provided for educational and portfolio purposes. Configuration files and scripts may be adapted for similar lab environments.
