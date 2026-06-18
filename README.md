@@ -216,6 +216,7 @@ This project began as a hands-on operating systems lab build and is now maintain
 
 **Rekh-225**
 - GitHub: [@Rekh-225](https://github.com/Rekh-225)
+- LinkedIN: ([Rehan Khaliq](https://www.linkedin.com/in/khaliq-rehan/))
 
 ## License
 
