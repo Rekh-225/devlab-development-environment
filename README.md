@@ -14,13 +14,32 @@
 
 ---
 
+## Table of Contents
+
+- [Overview](#overview)
+- [What This Project Shows](#what-this-project-shows)
+- [Architecture](#architecture)
+- [Technology Stack](#technology-stack)
+- [Screenshots](#screenshots)
+- [Repository Structure](#repository-structure)
+- [Key Implementation Details](#key-implementation-details)
+- [Replicating This Environment](#replicating-this-environment)
+  - [Prerequisites](#prerequisites)
+  - [Installation / Getting Started](#installation--getting-started)
+  - [Usage](#usage)
+- [Project Origin & Notes](#project-origin--notes)
+- [Author](#author)
+- [License](#license)
+
+---
+
 ## Overview
 
 DevLab is a self-hosted development environment built on an Ubuntu Server VM in Microsoft Azure. The project demonstrates how a small software team could run its own private source-code hosting, issue tracking, website, monitoring dashboard, internal DNS, and backup workflow without depending on managed platforms such as GitHub or GitLab.com.
 
 The environment is intentionally built from standard Linux services rather than a single bundled platform. This made the project useful for practicing server administration, service hardening, reverse proxy configuration, systemd services, firewall rules, DNS records, and backup automation.
 
-The VM is not intended to run continuously. It is usually powered on only for demos, testing, or maintenance.
+> **Note:** This is a personal portfolio project. The live VM deployed for my own use is usually powered off to save costs and only turned on for demos or maintenance. However, the instructions and scripts provided in this repository can be used to replicate the exact same setup on your own infrastructure.
 
 ## What This Project Shows
 
@@ -151,15 +170,52 @@ The server uses layered network controls:
 
 Backups are handled with a small shell script using `rsync`. A root cron job runs it every night at 23:00 and writes success/failure entries to a log file.
 
-## Project Origin
+## Replicating This Environment
 
-This project began as a hands-on operating systems lab build and is now maintained as a personal infrastructure and DevOps portfolio project.
+While my personal instance is kept offline to save resources, you can replicate this entire stack on your own server or VM. 
 
-## Notes
+### Prerequisites
 
-- The public server may be offline because the VM is only powered on when needed.
-- The HTTPS setup uses a self-signed certificate because the deployment uses an IP-based demo environment rather than a registered domain.
-- Screenshots are included as evidence of the configured services and tested workflows.
+- A fresh Ubuntu 24.04 LTS machine (VM or bare-metal).
+- A user account with `sudo` privileges.
+- Basic familiarity with Linux command line and SSH.
+- Allowed inbound ports on your firewall (e.g., 22 for SSH, 80 for HTTP, 443 for HTTPS, 3000 for Gitea, 19999 for Netdata).
+
+### Installation / Getting Started
+
+1. **Clone this repository** onto your server:
+   ```bash
+   git clone https://github.com/Rekh-225/devlab-development-environment.git
+   cd devlab-development-environment
+   ```
+
+2. **Review configurations**:
+   Before running the setup, review the files in the `configs/` and `scripts/` directories to ensure paths, domain names (if applicable), and IP addresses align with your needs.
+
+3. **Run the setup script**:
+   The `setup-server.sh` script automates much of the installation. Run it to set up dependencies, firewall rules, and services.
+   *(Make sure to review the script before executing it to understand what it modifies on your system.)*
+   ```bash
+   chmod +x scripts/setup-server.sh
+   sudo ./scripts/setup-server.sh
+   ```
+
+### Usage
+
+Once your environment is built, you can access the various services at your server's IP address or configured domain name:
+
+- **Nginx Static Site & Flask App:** `http://<your-server-ip>/` and `https://<your-server-ip>/`
+- **Gitea:** `http://<your-server-ip>:3000` (First-time access will prompt you to set up an admin user and configure the database).
+- **Netdata Monitoring:** `http://<your-server-ip>:19999`
+
+## Project Origin & Notes
+
+This project began as a hands-on operating systems lab build and is now maintained as a personal infrastructure and DevOps portfolio project. The HTTPS setup uses a self-signed certificate because the deployment uses an IP-based demo environment rather than a registered domain. 
+
+## Author
+
+**Rekh-225**
+- GitHub: [@Rekh-225](https://github.com/Rekh-225)
 
 ## License
 
